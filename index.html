@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,12 +16,12 @@
 
     :root{
       /* Paleta Club EROS */
-      --gold:#D4AF37;            /* primario */
+      --gold:#D4AF37;
       --gold-dark:#B4902F;
       --gold-soft:#F1D27A;
       --gold-accent:#FFEAA7;
 
-      --bordeaux:#1E0B10;        /* fondo oscuro */
+      --bordeaux:#1E0B10;
       --bordeaux-soft:#2B0F16;
       --bordeaux-deep:#4A1520;
 
@@ -126,7 +125,8 @@
         0 0 35px rgba(212,175,55,.25);
     }
     .gift-box:hover{transform:translateY(-6px) scale(1.015);box-shadow:0 28px 72px rgba(212,175,55,.45),0 0 0 1px rgba(212,175,55,.35),inset 0 1px 0 rgba(255,255,255,.12)}
-    .gift-box.opened{animation:giftOpen .8s cubic-bezier(.68,-.55,.265,1.55);pointer-events:none;transform-origin:center}
+    /* 👉 ahora NO bloqueamos los clics cuando está abierta */
+    .gift-box.opened{animation:giftOpen .8s cubic-bezier(.68,-.55,.265,1.55);transform-origin:center}
     @keyframes giftOpen{0%{transform:scale(1) rotateY(0)}50%{transform:scale(1.08) rotateY(180deg)}100%{transform:scale(.96) rotateY(360deg)}}
     .gift-icon{font-size:clamp(4rem,12vw,6rem);margin-bottom:8px;animation:giftFloat 3s ease-in-out infinite}
     @keyframes giftFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(5deg)}}
@@ -141,6 +141,7 @@
       margin-top:26px; font-family:var(--ff-ui); letter-spacing:.3px;
       font-size:clamp(1rem,2.2vw,1.15rem); color:var(--gold-soft);
       text-align:center; font-weight:600; animation:pulse 2s ease-in-out infinite;
+      cursor:pointer; /* para indicar que se puede tocar para reabrir */
     }
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
@@ -238,7 +239,6 @@
 <body>
   <!-- Preloader -->
   <div id="preloader" aria-hidden="true">
-    <!-- Reemplazá assets/eros-logo.png por tu logo real -->
     <img src="assets/eros-logo.png" id="logo" alt="Club EROS">
     <div class="loading-progress">
       <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
@@ -290,7 +290,7 @@
   <div id="soundHint" class="sound-hint" style="display:none;">Toque para habilitar audio</div>
 
   <script>
-    /* ===== Probabilidades ponderadas (mantenidas) ===== */
+    /* ===== Probabilidades ponderadas ===== */
     const PREMIOS = [
       { label:"💸 10.000 FICHAS GRATIS", weight:0.5  },
       { label:"🎉 3.000 FICHAS GRATIS",   weight:2.0  },
@@ -353,12 +353,12 @@
       tryAutoPlay();
     });
 
-    /* ===== Estado previo (key separada para EROS) ===== */
+    /* ===== Estado previo (clave EROS) ===== */
     const STORAGE_KEY = "premioEros";
     if(localStorage.getItem(STORAGE_KEY)){
       giftBox.classList.add("opened");
-      instructionText.textContent="Ya reclamaste tu premio";
-      instructionText.style.opacity="0.6";
+      instructionText.textContent = "Ya reclamaste tu premio • Tocá el regalo para verlo de nuevo";
+      instructionText.style.opacity = "0.85";
     }
 
     /* ===== Interacción caja ===== */
@@ -376,6 +376,12 @@
       setTimeout(()=>{mostrarPremio(premio);lanzarConfetti();},800);
     });
 
+    /* 👉 también permitimos reabrir tocando el texto */
+    instructionText.addEventListener('click',()=>{
+      const g = localStorage.getItem(STORAGE_KEY);
+      if(g) mostrarPremio(g);
+    });
+
     /* ===== Modal ===== */
     function mostrarPremio(p){
       window.scrollTo(0,0);
@@ -387,15 +393,15 @@
     }
     function cerrarModal(){
       resultModal.classList.remove('show');
-      instructionText.textContent="Ya reclamaste tu premio";
-      instructionText.style.opacity="0.6";
+      instructionText.textContent = "Ya reclamaste tu premio • Tocá el regalo para verlo de nuevo";
+      instructionText.style.opacity = "0.85";
     }
     resultModal.addEventListener('click',(e)=>{if(e.target===resultModal)cerrarModal();});
 
     /* ===== Confeti ===== */
     function lanzarConfetti(){
       confettiLayer.innerHTML='';
-      const colors=['#FFD700','#E6C200','#F8E38A','#B08D57','#7A2A36']; // dorados + borgoña
+      const colors=['#FFD700','#E6C200','#F8E38A','#B08D57','#7A2A36'];
       const total=120;
       for(let i=0;i<total;i++){
         const c=document.createElement("div");
@@ -408,22 +414,21 @@
         const tspin=(Math.random()*1.2+1)+'s';
         const delay=(Math.random()*0.7)+'s';
 
-        c.style.setProperty('--x', x);
-        c.style.setProperty('--amp', amp);
-        c.style.setProperty('--t', t);
-        c.style.setProperty('--tsway', tsway);
-        c.style.setProperty('--tspin', tspin);
-        c.style.setProperty('--delay', delay);
+    c.style.setProperty('--x', x);
+    c.style.setProperty('--amp', amp);
+    c.style.setProperty('--t', t);
+    c.style.setProperty('--tsway', tsway);
+    c.style.setProperty('--tspin', tspin);
+    c.style.setProperty('--delay', delay);
 
-        c.style.width=size+'px';
-        c.style.height=size+'px';
-        c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.width=size+'px';
+    c.style.height=size+'px';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
 
-        confettiLayer.appendChild(c);
-        setTimeout(()=>c.remove(), 6000);
+    confettiLayer.appendChild(c);
+    setTimeout(()=>c.remove(), 6000);
       }
     }
-
   </script>
 </body>
 </html>
